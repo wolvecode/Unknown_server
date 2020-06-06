@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/User');
+const { Food } = require('../models/Food');
 const multer = require('multer');
 const { auth } = require('../middleware/auth');
 
@@ -25,7 +25,7 @@ var upload = multer({ storage: storage }).single('file');
 //             Prodeuct Upload
 //=================================
 
-router.post('/upload', (req, res) => {
+router.post('/uploadImage', (req, res) => {
   upload(req, res, (err) => {
     if (err) return res.json({ success: false, err });
     return res.json({
@@ -34,6 +34,31 @@ router.post('/upload', (req, res) => {
       filename: res.req.file.filename,
     });
   });
+});
+
+router.post('/uploadFood', (req, res) => {
+  const food = new Food(req.body);
+  food.save((err) => {
+    if (err) return res.status(400).json({ success: false, err });
+    return res.status(200).json({ success: true });
+  });
+});
+
+router.post('/getFood', (req, res) => {
+  let order = req.body.order ? req.body.order : 'desc';
+  let sortBy = req.body.sortBy ? req.body.sortBy : '_id';
+  let limit = req.body.limit ? parseInt(req.body.limit) : 100;
+  let skip = parseInt(req.body.skip);
+
+  Food.find()
+    .populate('owner')
+    .sort([[sortBy, order]])
+    .skip(skip)
+    .limit(limit)
+    .exec((err, foods) => {
+      if (err) return res.status(400).json({ success: false, err });
+      return res.status(200).json({ success: true, foods });
+    });
 });
 
 module.exports = router;
