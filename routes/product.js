@@ -57,7 +57,9 @@ router.post('/getFood', (req, res) => {
     .limit(limit)
     .exec((err, foods) => {
       if (err) return res.status(400).json({ success: false, err });
-      return res.status(200).json({ success: true, foods });
+      return res
+        .status(200)
+        .json({ success: true, foods, postSize: foods.length });
     });
 });
 
