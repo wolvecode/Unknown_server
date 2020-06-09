@@ -50,7 +50,20 @@ router.post('/getFood', (req, res) => {
   let limit = req.body.limit ? parseInt(req.body.limit) : 100;
   let skip = parseInt(req.body.skip);
 
-  Food.find()
+  const findArgs = {};
+  // console.log(req.body.filters);
+  for (let key in req.body.filters) {
+    // console.log(key);
+    if (req.body.filters[key].length > 0) {
+      if (key === 'price ') {
+      } else {
+        findArgs[key] = req.body.filters[key];
+        // console.log(findArgs);
+      }
+    }
+  }
+
+  Food.find(findArgs)
     .populate('owner')
     .sort([[sortBy, order]])
     .skip(skip)
