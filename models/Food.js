@@ -39,19 +39,17 @@ const foodSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+foodSchema.index(
+  {
+    name: 'text',
+    description: 'text',
+  },
+  {
+    weights: {
+      name: 5,
+      description: 1,
+    },
+  }
+);
 const Food = mongoose.model('Food', foodSchema);
-
-// function validateFood(food) {
-//     const schema = {
-//       SuggestionID: Joi.any().required(),
-//       date: Joi.date(),
-//       comment: Joi.string()
-//         .min(3)
-//         .required()
-//     }
-
-//     return Joi.validate(food, schema)
-//   }
-
-// exports.validate = validate
 module.exports = { Food };
