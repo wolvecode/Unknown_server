@@ -93,4 +93,22 @@ router.post('/getFood', (req, res) => {
   }
 });
 
+//foods_by_id?id=${foodId}&type=single
+router.get('/foods_by_id', (req, res) => {
+  let type = req.query.type;
+  let foodIds = req.query.id;
+
+  if (type === 'array') {
+  }
+
+  //FIND FOOD THAT BELONGS TO THE FOOD ID
+
+  Food.find({ _id: { $in: foodIds } })
+    .populate('owner')
+    .exec((err, food) => {
+      if (err) return res.status(400).send(err);
+      return res.status(200).json(food);
+    });
+});
+
 module.exports = router;
