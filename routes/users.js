@@ -69,4 +69,52 @@ router.get('/logout', auth, (req, res) => {
   );
 });
 
+router.post('/addToCart', auth, (req, res) => {
+  User.find({ _id: req.user._id }, (err, userInfo) => {
+    console.log(userInfo);
+
+    let duplicate = false;
+
+    userInfo[0].cart.forEach((item) => {
+      if (item.id == req.query.foodId) {
+        duplicate = true;
+      }
+    });
+
+    if (duplicate) {
+      console.log(true);
+      User.findOneAndUpdate(
+        {
+          _id: req.user._id,
+          'cart.id': req.query.foodId,
+        },
+        { $inc: { 'cart.$.quantity': 1 } },
+        { new: true },
+        (err, userInfo) => {
+          if (err) return res.json({ success: false, err });
+          return res.status(200).json(userInfo.cart);
+        }
+      );
+    } else {
+      User.findByIdAndUpdate(
+        { _id: req.user._id },
+        {
+          $push: {
+            cart: {
+              id: req.query.foodId,
+              quantity: 1,
+              date: Date.now,
+            },
+          },
+        },
+        { new: true },
+        (err, userInfo) => {
+          if (err) return res.json({ success: false, err });
+          return res.status(200).json(userInfo.cart);
+        }
+      );
+    }
+  });
+});
+
 module.exports = router;
