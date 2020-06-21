@@ -70,12 +70,12 @@ router.get('/logout', auth, (req, res) => {
 });
 
 router.post('/addToCart', auth, (req, res) => {
-  User.find({ _id: req.user._id }, (err, userInfo) => {
+  User.findOne({ _id: req.user._id }, (err, userInfo) => {
     console.log(userInfo);
 
     let duplicate = false;
 
-    userInfo[0].cart.forEach((item) => {
+    userInfo.cart.forEach((item) => {
       if (item.id == req.query.foodId) {
         duplicate = true;
       }
