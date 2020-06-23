@@ -102,9 +102,9 @@ router.get('/foods_by_id', (req, res) => {
   if (type === 'array') {
     let ids = req.query.id.split(',');
     foodIds = [];
-    foodIds = ids.map(item => {
-      return item
-    })
+    foodIds = ids.map((item) => {
+      return item;
+    });
   }
 
   //FIND FOOD THAT BELONGS TO THE FOOD ID
