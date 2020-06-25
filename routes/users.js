@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { User } = require('../models/User');
+const { Food } = require('../models/Food');
 
 const { auth } = require('../middleware/auth');
 
@@ -8,6 +9,7 @@ const { auth } = require('../middleware/auth');
 //             User
 //=================================
 
+//return all info if authenicated
 router.get('/auth', auth, (req, res) => {
   res.status(200).json({
     _id: req.user._id,
@@ -34,6 +36,7 @@ router.post('/register', (req, res) => {
   });
 });
 
+//Login
 router.post('/login', (req, res) => {
   User.findOne({ email: req.body.email }, (err, user) => {
     if (!user)
@@ -71,10 +74,11 @@ router.get('/logout', auth, (req, res) => {
   );
 });
 
+//Find user, check if id sent exist. if exist trigger duplicate,
+//(Increase number of exist item) if not create new item item
+
 router.post('/addToCart', auth, (req, res) => {
   User.findOne({ _id: req.user._id }, (err, userInfo) => {
-    console.log(userInfo);
-
     let duplicate = false;
 
     userInfo.cart.forEach((item) => {
@@ -84,7 +88,6 @@ router.post('/addToCart', auth, (req, res) => {
     });
 
     if (duplicate) {
-      console.log(true);
       User.findOneAndUpdate(
         {
           _id: req.user._id,
@@ -116,6 +119,44 @@ router.post('/addToCart', auth, (req, res) => {
         }
       );
     }
+  });
+});
+
+//Find both user id and food id and romove it from cart
+router.get('/removeFromCart', auth, (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $pull: { cart: { id: req.query.id } } },
+    { new: true },
+    (err, userInfo) => {
+      let cart = userInfo.cart;
+      let array = cart.map((item) => {
+        return item.id;
+      });
+
+      Food.find({ _id: { $in: array } })
+        .populate('owner')
+        .exec((err, cartDetail) => {
+          return res.status(200).json({ cartDetail, cart });
+        });
+    }
+  );
+});
+
+//Handle showTotal at frontend
+router.get('/userCartInfo', auth, (req, res) => {
+  User.findOne({ _id: req.user._id }, (err, userInfo) => {
+    let cart = userInfo.cart;
+    let array = cart.map((item) => {
+      return item.id;
+    });
+
+    Food.find({ _id: { $in: array } })
+      .populate('owner')
+      .exec((err, cartDetail) => {
+        if (err) return res.status(400).json(err);
+        return res.status(200).json({ success: true, cartDetail, cart });
+      });
   });
 });
 
