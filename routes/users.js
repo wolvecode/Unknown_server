@@ -126,7 +126,7 @@ router.post('/addToCart', auth, (req, res) => {
 router.get('/removeFromCart', auth, (req, res) => {
   User.findOneAndUpdate(
     { _id: req.user._id },
-    { $pull: { cart: { id: req.query.id } } },
+    { $pull: { cart: { id: req.query._id } } },
     { new: true },
     (err, userInfo) => {
       let cart = userInfo.cart;
@@ -150,6 +150,7 @@ router.get('/userCartInfo', auth, (req, res) => {
     let array = cart.map((item) => {
       return item.id;
     });
+    console.log(array);
 
     Food.find({ _id: { $in: array } })
       .populate('owner')
