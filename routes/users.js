@@ -150,7 +150,6 @@ router.get('/userCartInfo', auth, (req, res) => {
     let array = cart.map((item) => {
       return item.id;
     });
-    console.log(array);
 
     Food.find({ _id: { $in: array } })
       .populate('owner')
