@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { User } = require('../models/User');
 const { Food } = require('../models/Food');
-
+const { Payment } = require('../models/Payment');
+const async = require('async');
 const { auth } = require('../middleware/auth');
 
 //=================================
@@ -10,6 +11,7 @@ const { auth } = require('../middleware/auth');
 //=================================
 
 //return all info if authenicated
+
 router.get('/auth', auth, (req, res) => {
   res.status(200).json({
     _id: req.user._id,
@@ -158,6 +160,90 @@ router.get('/userCartInfo', auth, (req, res) => {
         return res.status(200).json({ success: true, cartDetail, cart });
       });
   });
+});
+
+router.post('/successBuy', auth, (req, res) => {
+  console.log('here');
+  let history = [];
+  let transactionData = {};
+
+  //Save payment info inside the user collection
+
+  req.body.cartDetail.forEach((item) => {
+    history.push({
+      dataOfPurchase: Date.now,
+      name: item.name,
+      id: item._id,
+      price: item.price,
+      quantity: item.quantity,
+      paymentId: req.body.paymentData.paymentID,
+    });
+  });
+
+  //save payment info from rave into payment collection
+
+  transactionData.user = {
+    id: req.user._id,
+    name: req.user.name,
+    lastname: req.user.lastname,
+    email: req.user.email,
+  };
+
+  transactionData.data = req.body.paymentData;
+
+  transactionData.product = history;
+
+  User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $push: { history: history }, $set: { cart: [] } },
+    { new: true },
+    (err, user) => {
+      //If Error
+      if (err) return res.json({ success: false, err });
+      //If Success
+      const payment = new Payment({ transactionData });
+      payment.save((err, doc) => {
+        //If Error
+        if (err) return res.json({ success: false, err });
+
+        //If Success
+        //Increase the amount of number of the sold information
+        let products = [];
+        doc.product.forEach((item) => {
+          products.push({
+            id: item.id,
+            quantity: item.quantity,
+          });
+
+          // first item: quantity 2
+          // second item : 3
+
+          async.eachSeries(
+            products,
+            (item, callback) => {
+              Food.update(
+                { _id: item.id },
+                {
+                  $inc: { sold: item.quantity },
+                },
+                { new: false },
+                callback
+              );
+            },
+            (err) => {
+              if (err) return res.json({ success: false, err });
+              console.log('paid');
+              res.status(200).json({
+                success: true,
+                cart: user.cart,
+                cartDetail: [],
+              });
+            }
+          );
+        });
+      });
+    }
+  );
 });
 
 module.exports = router;
