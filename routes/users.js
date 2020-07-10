@@ -163,7 +163,6 @@ router.get('/userCartInfo', auth, (req, res) => {
 });
 
 router.post('/successBuy', auth, (req, res) => {
-  console.log('here');
   let history = [];
   let transactionData = {};
 
@@ -176,7 +175,7 @@ router.post('/successBuy', auth, (req, res) => {
       id: item._id,
       price: item.price,
       quantity: item.quantity,
-      paymentId: req.body.paymentData.paymentID,
+      paymentId: req.body.paymentData.tx.id,
     });
   });
 
@@ -185,11 +184,10 @@ router.post('/successBuy', auth, (req, res) => {
   transactionData.user = {
     id: req.user._id,
     name: req.user.name,
-    lastname: req.user.lastname,
     email: req.user.email,
   };
 
-  transactionData.data = req.body.paymentData;
+  transactionData.data = req.body.paymentData.data;
 
   transactionData.product = history;
 
@@ -201,7 +199,18 @@ router.post('/successBuy', auth, (req, res) => {
       //If Error
       if (err) return res.json({ success: false, err });
       //If Success
-      const payment = new Payment({ transactionData });
+      const payment = new Payment({
+        user: transactionData.user,
+        data: {
+          id: transactionData.data.data.id,
+          chargeResponseCode: transactionData.data.data.chargeResponseCode,
+          narration: transactionData.data.data.narration,
+          chargeRequestData: transactionData.data.data.chargeRequestData,
+          chargeResponseData: transactionData.data.data.chargeResponseData,
+        },
+        product: transactionData.product,
+      });
+
       payment.save((err, doc) => {
         //If Error
         if (err) return res.json({ success: false, err });
@@ -217,7 +226,6 @@ router.post('/successBuy', auth, (req, res) => {
 
           // first item: quantity 2
           // second item : 3
-
           async.eachSeries(
             products,
             (item, callback) => {
@@ -232,7 +240,6 @@ router.post('/successBuy', auth, (req, res) => {
             },
             (err) => {
               if (err) return res.json({ success: false, err });
-              console.log('paid');
               res.status(200).json({
                 success: true,
                 cart: user.cart,
