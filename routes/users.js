@@ -174,11 +174,11 @@ router.post('/successBuy', auth, (req, res) => {
 
   req.body.cartDetail.forEach((item) => {
     history.push({
-      dataOfPurchase: Date.now,
       name: item.name,
       id: item._id,
       price: item.price,
       quantity: item.quantity,
+      dateOfPurchase: Date.now(),
       paymentId: req.body.paymentData.tx.id,
     });
   });
@@ -233,7 +233,7 @@ router.post('/successBuy', auth, (req, res) => {
           async.eachSeries(
             products,
             (item, callback) => {
-              Food.update(
+              Food.updateMany(
                 { _id: item.id },
                 {
                   $inc: { sold: item.quantity },
