@@ -66,7 +66,6 @@ router.post('/getFood', (req, res) => {
   }
 
   if (term) {
-    console.log(term);
     Food.find(findArgs)
       .find({ $text: { $search: term } })
       .populate('owner')
