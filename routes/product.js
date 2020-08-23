@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { Food } = require('../models/Food');
 const multer = require('multer');
-const { auth } = require('../middleware/auth');
 
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
