@@ -15,7 +15,7 @@ const { auth } = require('../middleware/auth');
 router.get('/auth', auth, (req, res) => {
   res.status(200).json({
     _id: req.user._id,
-    isAdmin: req.user.role === 0 ? false : true,
+    isAdmin: req.user.role === 'Admin' ? true : false,
     isAuth: true,
     email: req.user.email,
     name: req.user.name,
@@ -145,7 +145,7 @@ router.get('/removeFromCart', auth, (req, res) => {
   );
 });
 
-//Handle showTotal at frontend
+//Handle showTotal at frontend( SHow the infomation(data) in the cart)
 router.get('/userCartInfo', auth, (req, res) => {
   User.findOne({ _id: req.user._id }, (err, userInfo) => {
     let cart = userInfo.cart;

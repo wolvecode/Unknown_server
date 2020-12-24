@@ -23,8 +23,8 @@ const userSchema = mongoose.Schema({
     maxlength: 50,
   },
   role: {
-    type: Number,
-    default: 0,
+    type: String,
+    default: 'User',
   },
   cart: {
     type: Array,
