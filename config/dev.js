@@ -1,3 +1,5 @@
+const { localhost } = require('./config');
+
 module.exports = {
-    mongoURI: 'mongodb://localhost/unknown'
-} 
+  mongoURI: localhost,
+};
