@@ -3,5 +3,5 @@ dotenv.config();
 
 module.exports = {
   port: process.env.PORT,
-  localhost: process.env.localhost,
+  localhost: 'mongodb://localhost/unknown',
 };
